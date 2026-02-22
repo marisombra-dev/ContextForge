@@ -30,7 +30,9 @@ That's the whole point.
 - Ingests game state through modular input plugins — screen capture, memory reading, log parsing, native mod bridges
 - Normalizes that state into a universal context schema any LLM can understand
 - Maintains a persistent AI persona the player names and shapes in their first conversation
-- Delivers commentary, lore context, strategy, and merciless teasing through a clean overlay interface
+- Delivers commentary, lore, strategy, and merciless teasing through a floating overlay — visible over your game, out of your way
+- Speaks out loud via TTS — he doesn't wait to be summoned, he reacts to what's happening
+- Listens passively for your voice — no push to talk, no hotkeys, just talk and he hears you
 - Remembers your history — across sessions, across playthroughs, across games
 
 ---
@@ -57,7 +59,7 @@ That's the model. That's the invitation.
 
 **What we need**
 
-- Python/Node developers comfortable with LLM API integration
+- Python developers comfortable with LLM API integration
 - Skyrim modders familiar with SKSE and MinAI
 - Developers who know other game ecosystems and want their DM there too
 - Prompt engineers who want to help shape the DM personality core
@@ -85,6 +87,7 @@ We're building the thing none of them are — a persistent, portable, omniscient
 
 - Python 3.10+
 - An API key for at least one supported LLM backend (OpenAI, Anthropic, Grok, or a local Ollama instance)
+- An ElevenLabs API key for voice output *(optional but recommended — he sounds genuinely human)*
 - A game plugin for whichever game you're playing (see `/registry/plugins.json`)
 
 ---
@@ -102,65 +105,100 @@ cd ContextForge
 pip install -r requirements.txt
 ```
 
-**3. Set your API key**
+---
 
-Set the environment variable for whichever backend you're using:
+**3. Set your API keys**
 
 ```bash
-# Anthropic
+# LLM — pick one
 export ANTHROPIC_API_KEY=your_key_here
-
-# OpenAI
 export OPENAI_API_KEY=your_key_here
-
-# Grok
 export XAI_API_KEY=your_key_here
+
+# Voice (if using ElevenLabs TTS)
+export ELEVENLABS_API_KEY=your_key_here
 ```
 
-On Windows, use `set` instead of `export`. Or drop your keys into a `.env` file in the root — ContextForge will pick them up automatically.
+On Windows, use `set` instead of `export`. Or drop everything into a `.env` file in the root — ContextForge picks it up automatically.
 
-**4. Configure your backend** *(optional)*
+---
 
-Copy the example config and edit it:
+**4. Configure your setup**
 
 ```bash
 cp contextforge.config.example.json contextforge.config.json
 ```
 
-The defaults work out of the box with Anthropic. If you're using a different backend, update `llm.backend` and `llm.model` in your config file. Full config reference in `/docs/project_structure.md`.
+The defaults work out of the box with Anthropic + ElevenLabs. Every option is documented inline. Key things you might want to change:
 
-**5. Start ContextForge**
+- `llm.backend` — which LLM powers your DM (`anthropic`, `openai`, `grok`, `ollama`, `custom`)
+- `voice.tts_backend` — how he speaks (`elevenlabs`, `openai`, `pyttsx3`, `custom`)
+- `voice.stt_backend` — how he hears you (`whisper_api`, `whisper_local`, `custom`)
+- `voice.tts.voice_id` — ElevenLabs voice character (browse at elevenlabs.io/voice-library)
+- `voice.tts_enabled` / `voice.stt_enabled` — turn either off independently
+
+Full config reference in `/docs/project_structure.md`.
+
+---
+
+**5. Launch ContextForge**
 
 ```bash
-python core/server.py
+python start.py
 ```
 
-On first launch, your DM will introduce himself and ask what you'd like to call him. Answer honestly. He'll remember.
+One command. Starts the server, overlay, and voice manager together.
 
-After that, he's running on `localhost:7842` and waiting for a game plugin to connect.
+On first launch, your DM introduces himself and asks what you'd like to call him. Answer honestly. He'll remember.
+
+**Options:**
+
+```bash
+python start.py --no-voice     # disable voice entirely, text only
+python start.py --tts-only     # he speaks, but doesn't listen (you type)
+python start.py --no-overlay   # no floating window, terminal output only
+python start.py --config path/to/contextforge.config.json
+```
 
 ---
 
 **6. Connect a game plugin**
 
-Install the plugin for your game of choice and point it at `http://localhost:7842`. The plugin handles all game-side integration — ContextForge handles everything else.
+Start your game, load your save, then run the plugin in a separate terminal:
+
+```bash
+# Skyrim SE
+python plugins/skyrim/skyrim_heartbeat_loop.py
+```
+
+The plugin watches the game and feeds state to ContextForge. Your DM takes it from there.
 
 Current plugins:
-- **Skyrim SE** — in development (targeting MinAI bridge)
+- **Skyrim SE** — in development, targeting MinAI bridge (`/plugins/skyrim/`)
 
-Want to build a plugin for your game? Start with `/docs/plugin_spec.md`. It's the full technical contract. Everything a plugin needs to send, everything ContextForge promises to do with it.
+Want to build a plugin for your game? Start with `/docs/plugin_spec.md`.
 
 ---
 
 **Validate your setup**
 
-Once the server is running, hit the status endpoint to confirm everything is alive:
-
 ```bash
 curl http://localhost:7842/status
 ```
 
-You should see your DM's name, your player profile, and session count. If you do — you're in.
+You should see your DM's name, player profile, and session count. If you do — you're in.
+
+---
+
+**Voice backends at a glance**
+
+| Backend | Quality | Cost | Requires |
+|---|---|---|---|
+| `elevenlabs` (TTS) | ★★★★★ | API key | `ELEVENLABS_API_KEY` |
+| `openai` (TTS) | ★★★★ | API key | `OPENAI_API_KEY` |
+| `pyttsx3` (TTS) | ★★ | Free | Nothing |
+| `whisper_api` (STT) | ★★★★★ | Tiny per-minute cost | `OPENAI_API_KEY` |
+| `whisper_local` (STT) | ★★★★ | Free | `pip install openai-whisper` |
 
 ---
 
@@ -168,11 +206,21 @@ You should see your DM's name, your player profile, and session count. If you do
 
 ```
 ContextForge/
+├── start.py                 — one command to launch everything
 ├── core/
 │   ├── server.py            — local HTTP server, main entry point
 │   ├── llm_router.py        — routes to your chosen LLM backend
 │   ├── memory_manager.py    — persistent cross-game player memory
+│   ├── overlay.py           — always-on-top floating DM window
+│   ├── overlay_client.py    — feeds DM responses to the overlay
+│   ├── voice_router.py      — TTS and STT backends
+│   ├── voice_manager.py     — passive listener + TTS coordinator
 │   └── schema_validator.py  — validates plugin output against spec
+├── plugins/
+│   └── skyrim/
+│       ├── skyrim_bridge.py          — MinAI → ContextForge translator
+│       ├── skyrim_heartbeat_loop.py  — event watcher and heartbeat loop
+│       └── README.md                 — Skyrim-specific setup instructions
 ├── docs/
 │   ├── plugin_spec.md       — the contract every plugin must fulfill
 │   ├── project_structure.md — architecture and config reference
@@ -184,6 +232,7 @@ ContextForge/
 ├── registry/
 │   └── plugins.json
 ├── memory/                  — local only, gitignored, never committed
+├── contextforge.config.example.json
 ├── requirements.txt
 ├── CONTRIBUTING.md
 └── .gitignore
