@@ -1,0 +1,50 @@
+{
+  "_comment": "Copy this file to contextforge.config.json and fill in your values. Never commit your real config — it's gitignored.",
+
+  "version": "0.2",
+
+  "server": {
+    "port": 7842,
+    "host": "localhost"
+  },
+
+  "llm": {
+    "_comment": "Supported backends: openai, anthropic, grok, ollama, custom",
+    "backend": "anthropic",
+    "model": "claude-opus-4-6",
+    "api_key_env": "ANTHROPIC_API_KEY",
+    "max_tokens": 300,
+    "temperature": 0.85,
+
+    "_ollama_example": "If using ollama, set backend to 'ollama' and set ollama_url below",
+    "ollama_url": "http://localhost:11434/api/chat",
+
+    "_custom_example": "If using a custom endpoint, set backend to 'custom' and set custom_endpoint below",
+    "custom_endpoint": ""
+  },
+
+  "dm": {
+    "_comment": "Filled in automatically during first-launch onboarding. You can set these manually to skip it.",
+    "name": null,
+    "gender": null,
+    "onboarding_complete": false
+  },
+
+  "memory": {
+    "enabled": true,
+    "storage_path": "./memory/",
+    "max_session_history": 50,
+    "cross_game_memory": true,
+    "_comment_player_id": "Change this if you want multiple player profiles on the same machine.",
+    "player_id": "default_player"
+  },
+
+  "overlay": {
+    "enabled": true,
+    "position": "bottom_right",
+    "opacity": 0.9,
+    "hotkey": "F9"
+  },
+
+  "heartbeat_interval_seconds": 30
+}
