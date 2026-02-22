@@ -1,0 +1,109 @@
+{
+  "contextforge_version": "0.1",
+  "plugin_id": "skyrim_se",
+  "game_name": "The Elder Scrolls V: Skyrim Special Edition",
+  "update_type": "event",
+  "event_type": "combat_start",
+  "timestamp": "2024-03-15T21:47:33+00:00",
+
+  "player": {
+    "name": "Aria",
+    "level": 24,
+    "health_current": 142,
+    "health_max": 210,
+    "health_percent": 0.68,
+    "status_effects": ["poisoned"],
+    "faction_standings": [
+      "Companions: Allied",
+      "College of Winterhold: Member",
+      "Whiterun: Thane"
+    ]
+  },
+
+  "location": {
+    "name": "Bleak Falls Sanctum",
+    "type": "dungeon",
+    "region": "Whiterun Hold",
+    "is_interior": true
+  },
+
+  "world": {
+    "time_of_day": "night",
+    "weather": "blizzard",
+    "in_combat": true,
+    "is_sneaking": false,
+    "is_trespassing": false
+  },
+
+  "quests": {
+    "active": [
+      {
+        "name": "Bleak Falls Barrow",
+        "current_objective": "Retrieve the Dragonstone",
+        "stage": "30"
+      },
+      {
+        "name": "The Golden Claw",
+        "current_objective": "Find Arvel the Swift",
+        "stage": "20"
+      }
+    ],
+    "recently_completed": [],
+    "recently_failed": []
+  },
+
+  "entities_nearby": [
+    {
+      "name": "Draugr Deathlord",
+      "type": "enemy",
+      "disposition": "hostile",
+      "is_essential": false
+    },
+    {
+      "name": "Draugr",
+      "type": "enemy",
+      "disposition": "hostile",
+      "is_essential": false
+    },
+    {
+      "name": "Draugr",
+      "type": "enemy",
+      "disposition": "hostile",
+      "is_essential": false
+    }
+  ],
+
+  "recent_events": [
+    {
+      "event": "Player activated Word Wall — learned new shout word",
+      "timestamp": "2024-03-15T21:33:02+00:00"
+    },
+    {
+      "event": "Player opened ancient chest",
+      "timestamp": "2024-03-15T21:44:18+00:00"
+    },
+    {
+      "event": "Draugr Deathlord burst from sarcophagus",
+      "timestamp": "2024-03-15T21:47:31+00:00"
+    },
+    {
+      "event": "Player poisoned by Draugr Deathlord",
+      "timestamp": "2024-03-15T21:47:33+00:00"
+    }
+  ],
+
+  "plugin_extras": {
+    "shouts_known": ["Unrelenting Force", "Whirlwind Sprint", "Fire Breath"],
+    "shouts_on_cooldown": ["Unrelenting Force"],
+    "is_werewolf": false,
+    "is_vampire": false,
+    "bounty_whiterun": 0,
+    "bounty_windhelm": 0,
+    "current_followers": ["Lydia"],
+    "lydia_status": "separated — last seen at dungeon entrance",
+    "hours_played_this_session": 2.6,
+    "times_died_this_session": 1,
+    "magicka_percent": 0.45,
+    "stamina_percent": 0.30
+  }
+}
