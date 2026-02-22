@@ -17,12 +17,17 @@ jsonschema>=4.22.0
 # Environment variable management
 python-dotenv>=1.0.0
 
-# For Local Whisper
-pip install openai-whisper soundfile
+# Audio playback (TTS output)
+pygame>=2.5.0
 
-# For Eleven Labs
-pip install httpx
+# Audio recording (STT input)
+sounddevice>=0.4.6
+soundfile>=0.12.1
 
-pygame
-sounddevice
-soundfile
+# Optional — local Whisper STT (no API cost, ~140MB model download on first run)
+# Uncomment if using stt_backend: whisper_local
+# openai-whisper
+
+# Optional — local TTS (no API cost, sounds robotic)
+# Uncomment if using tts_backend: pyttsx3
+# pyttsx3
