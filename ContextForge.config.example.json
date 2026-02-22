@@ -23,6 +23,57 @@
     "custom_endpoint": ""
   },
 
+  "voice": {
+    "_comment": "Set tts_enabled/stt_enabled to false to disable either independently",
+    "tts_enabled": true,
+    "stt_enabled": true,
+
+    "_tts_comment": "Supported TTS backends: elevenlabs, openai, pyttsx3, custom",
+    "tts_backend": "elevenlabs",
+
+    "_stt_comment": "Supported STT backends: whisper_api, whisper_local, custom",
+    "stt_backend": "whisper_api",
+
+    "tts": {
+      "_elevenlabs": "ElevenLabs — best quality. Get your voice_id from elevenlabs.io/voice-library",
+      "api_key_env":      "ELEVENLABS_API_KEY",
+      "voice_id":         "onwK4e9ZLuTAKqWW03F9",
+      "model_id":         "eleven_monolingual_v1",
+      "stability":        0.45,
+      "similarity_boost": 0.75,
+      "style":            0.35,
+
+      "_openai": "OpenAI TTS — swap tts_backend to 'openai' and set these",
+      "model": "tts-1-hd",
+      "voice": "onyx",
+      "speed": 0.95,
+
+      "_pyttsx3": "pyttsx3 — local/offline, no API key. Swap tts_backend to 'pyttsx3'",
+      "rate":        165,
+      "volume":      1.0,
+      "voice_index": 0,
+
+      "_custom": "Custom TTS endpoint — swap tts_backend to 'custom'",
+      "custom_tts_endpoint": ""
+    },
+
+    "stt": {
+      "_whisper_api": "Whisper via OpenAI API — accurate, costs a tiny amount per minute",
+      "api_key_env": "OPENAI_API_KEY",
+      "language":    "en",
+
+      "_whisper_local": "Local Whisper — free, runs on your machine. Swap stt_backend to 'whisper_local'",
+      "whisper_model": "base",
+
+      "_silence": "Stop recording after this much quiet",
+      "silence_threshold": 0.01,
+      "silence_duration":  1.5,
+
+      "_custom": "Custom STT endpoint — swap stt_backend to 'custom'",
+      "custom_stt_endpoint": ""
+    }
+  },
+
   "dm": {
     "_comment": "Filled in automatically during first-launch onboarding. You can set these manually to skip it.",
     "name": null,
