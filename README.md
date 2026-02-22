@@ -1,6 +1,4 @@
-
 # ContextForge
-
 ### The AI Dungeon Master who follows you everywhere.
 
 ---
@@ -81,6 +79,122 @@ We're building the thing none of them are — a persistent, portable, omniscient
 
 ---
 
-**Getting Started / Contributing**
+## Getting Started
 
-*(Documentation incoming — this is an early flag in the ground. If you're reading this and thinking "I could build that plugin" — yes. You could. Please do.)*
+**Requirements**
+
+- Python 3.10+
+- An API key for at least one supported LLM backend (OpenAI, Anthropic, Grok, or a local Ollama instance)
+- A game plugin for whichever game you're playing (see `/registry/plugins.json`)
+
+---
+
+**1. Clone the repo**
+
+```bash
+git clone https://github.com/marisombra-dev/ContextForge.git
+cd ContextForge
+```
+
+**2. Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+**3. Set your API key**
+
+Set the environment variable for whichever backend you're using:
+
+```bash
+# Anthropic
+export ANTHROPIC_API_KEY=your_key_here
+
+# OpenAI
+export OPENAI_API_KEY=your_key_here
+
+# Grok
+export XAI_API_KEY=your_key_here
+```
+
+On Windows, use `set` instead of `export`. Or drop your keys into a `.env` file in the root — ContextForge will pick them up automatically.
+
+**4. Configure your backend** *(optional)*
+
+Copy the example config and edit it:
+
+```bash
+cp contextforge.config.example.json contextforge.config.json
+```
+
+The defaults work out of the box with Anthropic. If you're using a different backend, update `llm.backend` and `llm.model` in your config file. Full config reference in `/docs/project_structure.md`.
+
+**5. Start ContextForge**
+
+```bash
+python core/server.py
+```
+
+On first launch, your DM will introduce himself and ask what you'd like to call him. Answer honestly. He'll remember.
+
+After that, he's running on `localhost:7842` and waiting for a game plugin to connect.
+
+---
+
+**6. Connect a game plugin**
+
+Install the plugin for your game of choice and point it at `http://localhost:7842`. The plugin handles all game-side integration — ContextForge handles everything else.
+
+Current plugins:
+- **Skyrim SE** — in development (targeting MinAI bridge)
+
+Want to build a plugin for your game? Start with `/docs/plugin_spec.md`. It's the full technical contract. Everything a plugin needs to send, everything ContextForge promises to do with it.
+
+---
+
+**Validate your setup**
+
+Once the server is running, hit the status endpoint to confirm everything is alive:
+
+```bash
+curl http://localhost:7842/status
+```
+
+You should see your DM's name, your player profile, and session count. If you do — you're in.
+
+---
+
+**Folder structure**
+
+```
+ContextForge/
+├── core/
+│   ├── server.py            — local HTTP server, main entry point
+│   ├── llm_router.py        — routes to your chosen LLM backend
+│   ├── memory_manager.py    — persistent cross-game player memory
+│   └── schema_validator.py  — validates plugin output against spec
+├── docs/
+│   ├── plugin_spec.md       — the contract every plugin must fulfill
+│   ├── project_structure.md — architecture and config reference
+│   ├── DM_personality_core.md
+│   └── DM_system_prompt.md
+├── tests/mock_state/
+│   ├── skyrim_heartbeat.json
+│   └── skyrim_combat_event.json
+├── registry/
+│   └── plugins.json
+├── memory/                  — local only, gitignored, never committed
+├── requirements.txt
+├── CONTRIBUTING.md
+└── .gitignore
+```
+
+---
+
+## Contributing
+
+Read `CONTRIBUTING.md`. It's short, it's friendly, and it explains exactly how to build a plugin without touching the core.
+
+If you're reading this and thinking *"I could build that plugin"* — yes. You could. Please do.
+
+---
