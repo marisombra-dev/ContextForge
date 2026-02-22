@@ -1,0 +1,96 @@
+{
+  "contextforge_version": "0.1",
+  "plugin_id": "skyrim_se",
+  "game_name": "The Elder Scrolls V: Skyrim Special Edition",
+  "update_type": "heartbeat",
+  "event_type": null,
+  "timestamp": "2024-03-15T21:34:12+00:00",
+
+  "player": {
+    "name": "Aria",
+    "level": 24,
+    "health_current": 187,
+    "health_max": 210,
+    "health_percent": 0.89,
+    "status_effects": ["well rested"],
+    "faction_standings": [
+      "Companions: Allied",
+      "College of Winterhold: Member",
+      "Whiterun: Thane"
+    ]
+  },
+
+  "location": {
+    "name": "Bleak Falls Barrow",
+    "type": "dungeon",
+    "region": "Whiterun Hold",
+    "is_interior": true
+  },
+
+  "world": {
+    "time_of_day": "night",
+    "weather": "blizzard",
+    "in_combat": false,
+    "is_sneaking": true,
+    "is_trespassing": false
+  },
+
+  "quests": {
+    "active": [
+      {
+        "name": "Bleak Falls Barrow",
+        "current_objective": "Retrieve the Dragonstone",
+        "stage": "30"
+      },
+      {
+        "name": "The Golden Claw",
+        "current_objective": "Find Arvel the Swift",
+        "stage": "20"
+      }
+    ],
+    "recently_completed": [],
+    "recently_failed": []
+  },
+
+  "entities_nearby": [
+    {
+      "name": "Draugr",
+      "type": "enemy",
+      "disposition": "hostile",
+      "is_essential": false
+    },
+    {
+      "name": "Arvel the Swift",
+      "type": "npc",
+      "disposition": "neutral",
+      "is_essential": true
+    }
+  ],
+
+  "recent_events": [
+    {
+      "event": "Player killed Draugr Overlord",
+      "timestamp": "2024-03-15T21:28:44+00:00"
+    },
+    {
+      "event": "Player entered Bleak Falls Sanctum",
+      "timestamp": "2024-03-15T21:30:11+00:00"
+    },
+    {
+      "event": "Player activated Word Wall — learned new shout word",
+      "timestamp": "2024-03-15T21:33:02+00:00"
+    }
+  ],
+
+  "plugin_extras": {
+    "shouts_known": ["Unrelenting Force", "Whirlwind Sprint", "Fire Breath"],
+    "shouts_unlocked_today": ["Fire Breath"],
+    "is_werewolf": false,
+    "is_vampire": false,
+    "bounty_whiterun": 0,
+    "bounty_windhelm": 0,
+    "current_followers": ["Lydia"],
+    "hours_played_this_session": 2.4,
+    "times_died_this_session": 1
+  }
+}
