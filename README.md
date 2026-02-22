@@ -49,7 +49,7 @@ Gender, name, personality flavor — established naturally, conversationally, be
 
 **Current status**
 
-Proof of concept targeting Skyrim SE, using MinAI for game state awareness.
+Proof of concept targeting Skyrim SE, using a lightweight custom ESP for game state awareness.
 
 The architecture is designed from the ground up to be game-agnostic. Every new plugin the community builds extends your DM's reach into a new world. Someone who loves Elden Ring builds the Elden Ring plugin. Someone who loves Baldur's Gate 3 builds that one. The framework grows more powerful every time someone scratches their own itch.
 
@@ -60,7 +60,7 @@ That's the model. That's the invitation.
 **What we need**
 
 - Python developers comfortable with LLM API integration
-- Skyrim modders familiar with SKSE and MinAI
+- Skyrim modders familiar with SKSE and PapyrusUtil
 - Developers who know other game ecosystems and want their DM there too
 - Prompt engineers who want to help shape the DM personality core
 - People who just think this should exist and want to watch it get built
@@ -173,11 +173,11 @@ python plugins/skyrim/skyrim_heartbeat_loop.py
 
 The plugin watches the game and feeds state to ContextForge. Your DM takes it from there.
 
-  Current plugins:
+Current plugins:
 - **Skyrim SE** — in development (`/plugins/skyrim/`)
-  Requires: Skyrim SE, SKSE64, PapyrusUtil SE
-  No MinAI or CHIM dependency — ships with its own lightweight ESP.
-  
+  Requires: Skyrim SE, SKSE64, PapyrusUtil SE. Ships with its own lightweight ESP.
+  [`)
+
 Want to build a plugin for your game? Start with `/docs/plugin_spec.md`.
 
 ---
@@ -220,7 +220,7 @@ ContextForge/
 │   └── schema_validator.py  — validates plugin output against spec
 ├── plugins/
 │   └── skyrim/
-│       ├── skyrim_bridge.py          — MinAI → ContextForge translator
+│       ├── skyrim_bridge.py          — ESP state → ContextForge translator
 │       ├── skyrim_heartbeat_loop.py  — event watcher and heartbeat loop
 │       └── README.md                 — Skyrim-specific setup instructions
 ├── docs/
