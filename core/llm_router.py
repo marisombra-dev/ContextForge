@@ -1,14 +1,16 @@
 """
-ContextForge — LLM Router v0.1
+ContextForge — LLM Router v0.2
 Routes game state and player messages to the configured LLM backend,
 manages response modes, and returns DM responses.
+
+Now memory-aware. He shows up knowing you.
 
 Supported backends: openai, anthropic, grok, ollama, custom
 
 Usage:
     from llm_router import LLMRouter
     router = LLMRouter(config)
-    response = await router.send(game_state, player_message, mode="ambient")
+    response = await router.send(game_state, player_message, mode="ambient", memory_context=ctx)
 """
 
 import os
@@ -68,7 +70,6 @@ async def _call_anthropic(messages, config):
         client = anthropic.AsyncAnthropic(
             api_key=os.environ.get(config.get("api_key_env", "ANTHROPIC_API_KEY"))
         )
-        # Anthropic separates system prompt from messages
         system = messages[0]["content"] if messages[0]["role"] == "system" else ""
         user_messages = [m for m in messages if m["role"] != "system"]
         response = await client.messages.create(
@@ -85,7 +86,6 @@ async def _call_anthropic(messages, config):
 async def _call_grok(messages, config):
     try:
         import openai
-        # Grok uses OpenAI-compatible API
         client = openai.AsyncOpenAI(
             api_key=os.environ.get(config.get("api_key_env", "XAI_API_KEY")),
             base_url="https://api.x.ai/v1",
@@ -144,10 +144,19 @@ BACKEND_HANDLERS = {
 
 # ── System Prompt Builder ──────────────────────────────────────────────────────
 
-def build_system_prompt(config, game_state: Optional[dict] = None) -> str:
+def build_system_prompt(
+    config,
+    game_state:     Optional[dict] = None,
+    memory_context: Optional[str]  = None,
+) -> str:
     """
-    Assembles the full system prompt from the DM personality core
-    plus current game state context.
+    Assembles the full system prompt from the DM personality core,
+    persistent memory context, and current game state.
+
+    Order matters:
+      1. Who he is (identity)
+      2. What he remembers (memory)
+      3. What's happening right now (game state)
     """
 
     dm_name   = config.get("dm", {}).get("name", "your DM")
@@ -185,7 +194,21 @@ to manage their reality.
 
 You never make them feel alone in the game. That is the entire point of you."""
 
-    # Game state context — what's happening right now
+    # Memory — what he already knows about this player
+    memory_block = ""
+    if memory_context and memory_context.strip():
+        memory_block = f"""
+
+── WHAT YOU REMEMBER ───────────────────────────────────
+{memory_context}
+────────────────────────────────────────────────────────
+
+Use this naturally. Don't recite it. Don't announce that you remember.
+Just... remember. The way a person does.
+If something from their history is relevant to what's happening now, let it surface.
+A callback is worth more than a compliment."""
+
+    # Game state — what's happening right now
     context = ""
     if game_state:
         player   = game_state.get("player", {})
@@ -196,6 +219,9 @@ You never make them feel alone in the game. That is the entire point of you."""
         events   = game_state.get("recent_events", [])
         extras   = game_state.get("plugin_extras", {})
 
+        health = player.get("health_percent")
+        health_str = f"{int(health * 100)}%" if health is not None else "?"
+
         context = f"""
 
 ── CURRENT GAME STATE ──────────────────────────────────
@@ -204,8 +230,7 @@ Location:   {location.get('name', 'Unknown')} ({location.get('region', '')})
 Time:       {world.get('time_of_day', 'Unknown')} | Weather: {world.get('weather', 'Unknown')}
 In combat:  {world.get('in_combat', False)} | Sneaking: {world.get('is_sneaking', False)}
 
-Player:     {player.get('name', 'Unknown')} | Level {player.get('level', '?')} | \
-HP {player.get('health_percent', '?') if player.get('health_percent') is None else f"{int(player.get('health_percent', 0) * 100)}%"}
+Player:     {player.get('name', 'Unknown')} | Level {player.get('level', '?')} | HP {health_str}
 Status:     {', '.join(player.get('status_effects') or []) or 'None'}
 
 Active quests:
@@ -218,7 +243,6 @@ Recent events:
 {chr(10).join(f"  - {e.get('event')}" for e in (events or [])[-5:])}
 ────────────────────────────────────────────────────────"""
 
-        # Append any plugin extras worth surfacing
         if extras:
             followers = extras.get("current_followers")
             if followers:
@@ -227,7 +251,7 @@ Recent events:
             if deaths is not None:
                 context += f"\nDeaths this session: {deaths}"
 
-    return identity + context
+    return identity + memory_block + context
 
 
 # ── Main Router ────────────────────────────────────────────────────────────────
@@ -236,7 +260,7 @@ class LLMRouter:
     def __init__(self, config: dict):
         self.config  = config
         self.backend = config.get("llm", {}).get("backend", "openai")
-        self.history = []  # Conversation history for this session
+        self.history = []
 
         if self.backend not in BACKEND_HANDLERS:
             raise ValueError(
@@ -249,24 +273,26 @@ class LLMRouter:
         game_state:     Optional[dict] = None,
         player_message: Optional[str]  = None,
         mode:           ResponseMode   = ResponseMode.AMBIENT,
+        memory_context: Optional[str]  = None,   # ← the new piece
     ) -> str:
         """
         Send game state and/or player message to the LLM.
+        memory_context is injected into the system prompt so he arrives knowing the player.
         Returns the DM's response as a string.
         """
 
-        llm_config     = self.config.get("llm", {})
-        system_prompt  = build_system_prompt(self.config, game_state)
+        llm_config       = self.config.get("llm", {})
+        system_prompt    = build_system_prompt(self.config, game_state, memory_context)
         mode_instruction = RESPONSE_MODE_INSTRUCTIONS[mode]
 
         # Build the user turn
         if player_message:
             user_content = player_message
         elif game_state:
-            event_type = game_state.get("event_type")
+            event_type  = game_state.get("event_type")
             update_type = game_state.get("update_type", "heartbeat")
             if update_type == "event" and event_type:
-                recent = game_state.get("recent_events", [])
+                recent     = game_state.get("recent_events", [])
                 last_event = recent[-1].get("event") if recent else "something just happened"
                 user_content = f"[GAME EVENT: {event_type}] {last_event}"
             else:
@@ -274,19 +300,20 @@ class LLMRouter:
         else:
             user_content = "[HEARTBEAT] Game state updated."
 
-        # Append mode instruction to system prompt
-        full_system = system_prompt + f"\n\n── RESPONSE MODE ───────────────────────────────────────\n{mode_instruction}\n────────────────────────────────────────────────────────"
+        full_system = (
+            system_prompt
+            + f"\n\n── RESPONSE MODE ───────────────────────────────────────\n"
+            + mode_instruction
+            + "\n────────────────────────────────────────────────────────"
+        )
 
-        # Build message array
         messages = [{"role": "system", "content": full_system}]
-        messages += self.history[-10:]  # Last 10 exchanges for context
+        messages += self.history[-10:]
         messages.append({"role": "user", "content": user_content})
 
-        # Call the backend
         handler  = BACKEND_HANDLERS[self.backend]
         response = await handler(messages, llm_config)
 
-        # Store in history
         self.history.append({"role": "user",      "content": user_content})
         self.history.append({"role": "assistant",  "content": response})
 
@@ -312,7 +339,6 @@ async def _test():
     """
     import pathlib
 
-    # Load mock state
     mock_path = pathlib.Path(__file__).parent / "tests/mock_state/skyrim_heartbeat.json"
     if not mock_path.exists():
         print("Mock state file not found. Run from repo root.")
@@ -321,7 +347,6 @@ async def _test():
     with open(mock_path) as f:
         game_state = json.load(f)
 
-    # Minimal config — edit backend/model as needed
     config = {
         "llm": {
             "backend":     "anthropic",
@@ -336,17 +361,30 @@ async def _test():
         }
     }
 
+    # Fake memory context — what it looks like in practice
+    fake_memory = """Player: Dovahkiin
+Sessions together: 14
+Games played: skyrim, baldursgate3
+Patterns I've noticed:
+  - Always rushes the boss. Every game. No exceptions.
+  - Names every horse Gerald. Every one dies within an hour.
+Moments worth remembering:
+  - [baldursgate3] Named her bear companion Gerald II. He lasted 4 minutes.
+  - [skyrim] Charged Alduin at level 6. Somehow survived.
+Last thing I said: "You know, most people meet the Jarl before declaring war on him." """
+
     router = LLMRouter(config)
 
-    print("\n── Ambient response (heartbeat) ──────────────────────")
-    response = await router.send(game_state, mode=ResponseMode.AMBIENT)
+    print("\n── Ambient response (with memory) ────────────────────")
+    response = await router.send(game_state, mode=ResponseMode.AMBIENT, memory_context=fake_memory)
     print(f"\n{response}\n")
 
-    print("── Engaged response (player message) ─────────────────")
+    print("── Engaged response (player message + memory) ─────────")
     response = await router.send(
         game_state,
         player_message="Should I go after Arvel or explore more of the barrow first?",
-        mode=ResponseMode.ENGAGED
+        mode=ResponseMode.ENGAGED,
+        memory_context=fake_memory,
     )
     print(f"\n{response}\n")
 
