@@ -1,0 +1,16 @@
+{
+  "contextforge_version": "0.1",
+  "last_updated": "2026-02-22",
+  "plugins": [
+    {
+      "plugin_id": "skyrim_se",
+      "game_name": "The Elder Scrolls V: Skyrim Special Edition",
+      "repo_url": null,
+      "author": null,
+      "status": "wanted",
+      "contextforge_min_version": "0.1",
+      "description": "Skyrim SE plugin via MinAI bridge. First priority target.",
+      "notes": "MinAI handles game state ingestion. See docs/plugin_spec.md to get started."
+    }
+  ]
+}
