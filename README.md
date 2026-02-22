@@ -1,4 +1,4 @@
-# ContextForge
+
 # ContextForge
 
 ### The AI Dungeon Master who follows you everywhere.
