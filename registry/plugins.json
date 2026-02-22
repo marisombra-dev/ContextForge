@@ -1,16 +1,61 @@
 {
-  "contextforge_version": "0.1",
-  "last_updated": "2026-02-22",
+  "_comment": "ContextForge Plugin Registry. Each entry represents a supported game plugin. Plugins live in their own repos and register here so the core knows what's available.",
+
+  "registry_version": "0.1",
+
   "plugins": [
     {
-      "plugin_id": "skyrim_se",
-      "game_name": "The Elder Scrolls V: Skyrim Special Edition",
-      "repo_url": null,
-      "author": null,
+      "id": "skyrim-se",
+      "name": "Skyrim Special Edition",
+      "status": "in_development",
+      "maintainer": "marisombra-dev",
+      "repo": "https://github.com/marisombra-dev/ContextForge-Skyrim",
+      "min_contextforge_version": "0.2",
+      "game_bridge": "MinAI",
+      "description": "Bridges ContextForge to Skyrim SE via MinAI. Sends heartbeat state and combat/quest events to the ContextForge core server.",
+      "requires": [
+        "Skyrim Special Edition",
+        "SKSE64",
+        "MinAI"
+      ],
+      "supported_events": [
+        "combat_start",
+        "combat_end",
+        "player_death",
+        "location_change",
+        "quest_update",
+        "level_up",
+        "dialogue_start",
+        "item_acquired"
+      ],
+      "notes": "First official plugin. Proof of concept target."
+    }
+  ],
+
+  "wanted": [
+    {
+      "id": "baldursgate3",
+      "name": "Baldur's Gate 3",
       "status": "wanted",
-      "contextforge_min_version": "0.1",
-      "description": "Skyrim SE plugin via MinAI bridge. First priority target.",
-      "notes": "MinAI handles game state ingestion. See docs/plugin_spec.md to get started."
+      "notes": "High community interest. Native scripting exposure makes this viable."
+    },
+    {
+      "id": "eldenring",
+      "name": "Elden Ring",
+      "status": "wanted",
+      "notes": "Memory-read approach likely required. Precedent exists in community tools."
+    },
+    {
+      "id": "cyberpunk2077",
+      "name": "Cyberpunk 2077",
+      "status": "wanted",
+      "notes": "CET (Cyber Engine Tweaks) provides solid scripting access."
+    },
+    {
+      "id": "witcher3",
+      "name": "The Witcher 3",
+      "status": "wanted",
+      "notes": "REDscript mod tooling available."
     }
   ]
 }
