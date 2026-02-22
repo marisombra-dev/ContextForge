@@ -173,9 +173,11 @@ python plugins/skyrim/skyrim_heartbeat_loop.py
 
 The plugin watches the game and feeds state to ContextForge. Your DM takes it from there.
 
-Current plugins:
-- **Skyrim SE** — in development, targeting MinAI bridge (`/plugins/skyrim/`)
-
+  Current plugins:
+- **Skyrim SE** — in development (`/plugins/skyrim/`)
+  Requires: Skyrim SE, SKSE64, PapyrusUtil SE
+  No MinAI or CHIM dependency — ships with its own lightweight ESP.
+  
 Want to build a plugin for your game? Start with `/docs/plugin_spec.md`.
 
 ---
