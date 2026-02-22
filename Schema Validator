@@ -226,6 +226,30 @@ def validate_plugin_extras(data, errors, warnings):
             ok("plugin_extras present and empty — that's fine")
 
 
+# ── Programmatic validator (used by server.py) ─────────────────────────────────
+
+def validate_data(data: dict):
+    """
+    Validate a game state dict against the ContextForge schema.
+    Returns (errors, warnings) as lists of strings.
+    Used by server.py to validate incoming plugin POST requests.
+    """
+    errors = []
+    warnings = []
+
+    validate_top_level(data, errors, warnings)
+    validate_update_type(data, errors, warnings)
+    validate_timestamp(data, errors, warnings)
+    validate_player(data, errors, warnings)
+    validate_location(data, errors, warnings)
+    validate_quests(data, errors, warnings)
+    validate_entities(data, errors, warnings)
+    validate_recent_events(data, errors, warnings)
+    validate_plugin_extras(data, errors, warnings)
+
+    return errors, warnings
+
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def validate(filepath):
