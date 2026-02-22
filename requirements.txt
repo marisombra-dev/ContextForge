@@ -16,3 +16,13 @@ jsonschema>=4.22.0
 
 # Environment variable management
 python-dotenv>=1.0.0
+
+# For Local Whisper
+pip install openai-whisper soundfile
+
+# For Eleven Labs
+pip install httpx
+
+pygame
+sounddevice
+soundfile
