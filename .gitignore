@@ -1,0 +1,44 @@
+# ContextForge .gitignore
+# Player data and secrets never leave the player's machine.
+
+# ── API Keys and secrets ───────────────────────────────────────────────────────
+.env
+.env.*
+*.key
+secrets.json
+
+# ── Player memory — stays local, always ───────────────────────────────────────
+memory/
+*.memory.json
+
+# ── User config — contains API keys and personal DM settings ──────────────────
+contextforge.config.json
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── OS nonsense ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE files ─────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
